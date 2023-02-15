@@ -1,7 +1,9 @@
 use walkdir::{DirEntry, WalkDir};
 use std::fs;
+use std::path::Path;
 
 
+#[allow(dead_code)]
 fn is_image_slow(entry: &DirEntry) -> bool {
 
     if entry.metadata().unwrap().is_file() {
@@ -13,6 +15,7 @@ fn is_image_slow(entry: &DirEntry) -> bool {
 }
 
 
+#[allow(dead_code)]
 fn is_image(entry: &DirEntry) -> bool {
 
     if entry.metadata().unwrap().is_file() {
@@ -42,6 +45,7 @@ fn is_image(entry: &DirEntry) -> bool {
 }
 
 
+#[allow(dead_code)]
 fn is_video_slow(entry: &DirEntry) -> bool {
 
     if entry.metadata().unwrap().is_file() {
@@ -80,6 +84,7 @@ fn is_video(entry: &DirEntry) -> bool {
 }
 
 
+#[allow(dead_code)]
 fn is_hidden(entry: &DirEntry) -> bool {
 
     entry.file_name()
@@ -89,30 +94,62 @@ fn is_hidden(entry: &DirEntry) -> bool {
 
 }
 
-fn get_directories(path: &str) {
 
+fn get_directories(path: &str) -> Vec<String> {
+
+    let mut dirs: Vec<String> = Vec::new();
     for file in WalkDir::new(path).into_iter().filter_map(|file| file.ok()) {
         if file.metadata().unwrap().is_dir() {
-            println!("{}", file.path().display());
+            dirs.push(file.path().strip_prefix(path).unwrap().to_str().unwrap().to_string());
         }
     }
+    dirs
 
 }
 
 
 fn main() {
 
-//    get_directories("/Users/jjps/Downloads/test");
+    let root_dir = "/Users/jjps/Downloads/test";
 // find out if there is video and picture directories
 // if not create them and put all directories in the pictures one
 // create all the pictures directories in the video directory if they don't exist
+
 // do the same but the other way around
 // find all videos and the pictures directly and move them to the videos directories
 // Do the same but the other way around
 // remove all empty directories
-    for entry in WalkDir::new("/Users/jjps/Downloads/test").into_iter().filter_map(|e| e.ok()) {
+    for entry in WalkDir::new(root_dir).into_iter().filter_map(|e| e.ok()) {
         if is_video(&entry) {
             println!("{}", entry.path().display());
+        }
+    }
+
+    println!("\n");
+    let pictures_path = Path::new(root_dir).join("pictures");
+    let videos_path = Path::new(root_dir).join("videos");
+    if !videos_path.exists() {
+        fs::create_dir(&videos_path).unwrap();
+    }
+    if !pictures_path.exists() {
+        println!("creating pictures");
+        fs::create_dir(&pictures_path).unwrap();
+        // Move everything into it.
+        for path in fs::read_dir(root_dir).unwrap() {
+            let p = path.unwrap().path();
+            if p.file_name().unwrap() != "videos" && p.file_name().unwrap() != "pictures" {
+                let new_p = pictures_path.join(p.file_name().unwrap());
+                if !new_p.exists() {
+                    fs::rename(p, new_p).unwrap();
+                }
+            }
+        }
+    }
+    let dirs = get_directories(pictures_path.to_str().unwrap());
+    for dir in &dirs {
+        let new_p = videos_path.join(dir);
+        if !new_p.exists() {
+            fs::create_dir_all(&new_p).unwrap();
         }
     }
 
