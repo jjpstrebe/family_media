@@ -1,0 +1,6 @@
+#!/bin/bash
+
+
+#offset is 0.4
+#ffmpeg -i "$2" -itsoffset $1 -i "$2" -map 0:v -map 1:a -c copy "$3"
+ffmpeg -i "$2" -itsoffset $1 -i "$2" -map 1:v -map 0:a -c copy "$3"

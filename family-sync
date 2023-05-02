@@ -1,0 +1,7 @@
+#!/bin/bash
+
+
+export RSYNC_PASSWORD='deity'
+
+rsync -aP --delete /Volumes/STREBE_ALL/family/ jjps@192.168.4.29:/media/jjps/family
+rsync -aP --delete /Volumes/STREBE_ALL/movies/ jjps@192.168.4.29:/media/jjps/movies

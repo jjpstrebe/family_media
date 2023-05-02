@@ -1,0 +1,7 @@
+#!/bin/bash
+
+
+cd $1
+ls -hal | tail -n +4 | awk '{print $9}' | awk '{ printf "file '"'"'"; print }' | awk '{print $0"'"'"'"}' > files.txt
+ffmpeg -f concat -safe 0 -i files.txt -c copy together.mp4
+rm files.txt
